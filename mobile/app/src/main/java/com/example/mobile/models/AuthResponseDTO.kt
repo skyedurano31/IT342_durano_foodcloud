@@ -16,5 +16,9 @@ data class AuthResponseDTO(
     val role: String? = null,
 
     @SerializedName("success")
-    val success: Boolean = false
+    val success: Boolean = false,
+
+    @SerializedName("authenticated")
+    val authenticated: Boolean = false
+
 )
