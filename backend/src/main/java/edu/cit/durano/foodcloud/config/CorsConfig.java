@@ -10,7 +10,11 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173") // Your React app URL
+                .allowedOrigins(
+                        "http://localhost:5173",     // React
+                        "http://10.0.2.2:8080",      // Android Emulator
+                        "http://localhost:8080"      // Local testing
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
