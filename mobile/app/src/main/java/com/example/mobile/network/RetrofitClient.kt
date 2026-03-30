@@ -11,6 +11,7 @@ object RetrofitClient {
 
     // For Android Emulator
     private const val BASE_URL = "http://10.0.2.2:8080/"
+    fun getBaseUrl(): String = BASE_URL
 
     // For Physical Device (replace with your computer's IP)
     // private const val BASE_URL = "http://192.168.1.100:8080/"
