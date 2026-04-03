@@ -42,15 +42,22 @@ public class RestSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        // UPDATED: Added all 3 origins from CorsConfig
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",     // React
+                "http://10.0.2.2:8080",      // Android Emulator
+                "http://localhost:8080"      // Local testing
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);  // Added from CorsConfig
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -62,7 +69,9 @@ public class RestSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // ADD THIS - OAuth2 endpoints
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
                         // Role-based endpoints
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
@@ -72,10 +81,14 @@ public class RestSecurityConfig {
 
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 
-                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> httpBasic.realmName("My App"));
+                .httpBasic(httpBasic -> httpBasic.realmName("My App"))
+                // ADD THIS - Google OAuth2
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("http://localhost:5173/oauth2/success", true)
+                        .failureUrl("http://localhost:5173/login?error=true")
+                );
 
         return http.build();
     }
