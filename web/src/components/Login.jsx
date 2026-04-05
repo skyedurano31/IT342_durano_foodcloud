@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axiosConfig.jsx';
+import axiosInstance from '../api/axiosConfig';
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,129 +9,164 @@ function Login() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Check if already logged in
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
+  // Traditional Login
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     
     try {
       const token = btoa(`${username}:${password}`);
-      console.log('Logging in with:', username);
       
-      const response = await axiosInstance.post('/auth/login', 
-        { username, password },
-        { headers: { Authorization: `Basic ${token}` } }
-      );
+      const response = await axiosInstance.get('/api/auth/me', {
+        headers: { Authorization: `Basic ${token}` }
+      });
       
-      console.log('Login response:', response.data);
-      
-      localStorage.setItem('auth', JSON.stringify({
-        token: token,
-        username: response.data.username || username
-      }));
+      // Save user info
+      localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem('authToken', token);
       
       navigate('/dashboard');
-      
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Login failed');
+      setError(err.response?.status === 401 ? 'Invalid username or password' : 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Google Login
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  };
+
+  // Register
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setError('');
     setSuccess('');
     
     try {
-      const response = await axiosInstance.post('/auth/register', {
+      await axiosInstance.post('/api/auth/register', {
         username,
         email,
         password_hash: password
       });
       
-      console.log('Register response:', response.data);
-      
-      if (response.data.success) {
-        setSuccess('Registration successful! You can now login.');
+      setSuccess('Registration successful! Please login.');
+      setTimeout(() => {
+        setIsLogin(true);
         setUsername('');
         setPassword('');
         setEmail('');
-        setTimeout(() => {
-          setIsLogin(true);
-          setSuccess('');
-        }, 2000);
-      } else {
-        setError(response.data.message || 'Registration failed');
-      }
-      
+        setSuccess('');
+      }, 2000);
     } catch (err) {
-      console.error('Register error:', err);
-      setError('Registration failed');
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h2>{isLogin ? 'Login' : 'Register'}</h2>
+    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+      <h2 style={{ textAlign: 'center' }}>{isLogin ? 'Login' : 'Register'}</h2>
       
-      {error && <p style={{ color: 'red', padding: '10px', border: '1px solid red', borderRadius: '4px' }}>{error}</p>}
-      {success && <p style={{ color: 'green', padding: '10px', border: '1px solid green', borderRadius: '4px' }}>{success}</p>}
+      {error && <div style={{ color: 'red', padding: '10px', marginBottom: '10px', background: '#ffeeee', borderRadius: '4px' }}>{error}</div>}
+      {success && <div style={{ color: 'green', padding: '10px', marginBottom: '10px', background: '#eeffee', borderRadius: '4px' }}>{success}</div>}
       
+      {/* Google Button - Only show on Login */}
+      {isLogin && (
+        <>
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '10px',
+              background: '#4285f4',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px'
+            }}
+          >
+            <span>🔵</span> Sign in with Google
+          </button>
+          
+          <div style={{ textAlign: 'center', margin: '15px 0', color: '#666' }}>OR</div>
+        </>
+      )}
+      
+      {/* Traditional Login/Register Form */}
       <form onSubmit={isLogin ? handleLogin : handleRegister}>
-        <div style={{ marginBottom: '10px' }}>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ width: '100%', padding: '8px' }}
-            required
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+          required
+          disabled={loading}
+        />
 
         {!isLogin && (
-          <div style={{ marginBottom: '10px' }}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '8px' }}
-              required
-            />
-          </div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+            required
+            disabled={loading}
+          />
         )}
 
-        <div style={{ marginBottom: '10px' }}>
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '8px' }}
-            required
-          />
-        </div>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+          required
+          disabled={loading}
+        />
 
-        <button 
+        <button
           type="submit"
+          disabled={loading}
           style={{
             width: '100%',
             padding: '10px',
-            background: '#007bff',
+            background: loading ? '#ccc' : '#007bff',
             color: 'white',
             border: 'none',
             borderRadius: '5px',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             marginBottom: '10px'
           }}
         >
-          {isLogin ? 'Login' : 'Register'}
+          {loading ? 'Please wait...' : (isLogin ? 'Login' : 'Register')}
         </button>
       </form>
 
-      <button 
+      <button
         onClick={() => {
           setIsLogin(!isLogin);
           setError('');
@@ -150,7 +185,7 @@ function Login() {
           textDecoration: 'underline'
         }}
       >
-        {isLogin ? 'Need an account? Register' : 'Have an account? Login'}
+        {isLogin ? 'Create an account' : 'Already have an account? Login'}
       </button>
     </div>
   );

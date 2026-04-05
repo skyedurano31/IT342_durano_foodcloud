@@ -1,25 +1,17 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: {
-    'Content-Type': 'application/json',
-  }
+    baseURL: 'http://localhost:8080',
+    withCredentials: true, // Important for Google login session
 });
 
-// Add request interceptor for auth
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const auth = localStorage.getItem('auth');
-    if (auth) {
-      const { token } = JSON.parse(auth);
-      if (token) {
+// Add token to every request if it exists (for traditional login)
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
         config.headers.Authorization = `Basic ${token}`;
-      }
     }
     return config;
-  },
-  (error) => Promise.reject(error)
-);
+});
 
 export default axiosInstance;
