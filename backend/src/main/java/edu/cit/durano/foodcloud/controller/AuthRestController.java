@@ -1,7 +1,6 @@
 package edu.cit.durano.foodcloud.controller;
 
 import edu.cit.durano.foodcloud.dto.AuthResponseDTO;
-import edu.cit.durano.foodcloud.dto.LoginRequestDTO;
 import edu.cit.durano.foodcloud.entity.Role;
 import edu.cit.durano.foodcloud.entity.User;
 import edu.cit.durano.foodcloud.repository.UserRepository;
@@ -11,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -52,60 +54,69 @@ public class AuthRestController {
         }
     }
 
-    // Login endpoint - with Basic Auth, Spring Security handles the actual auth
-    // This endpoint just returns user info after successful authentication
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
-        // With Basic Auth, the actual authentication happens in the filter chain
-        // This endpoint is just to return user info after successful auth
-        try {
-            // Spring Security will have authenticated the user before this method is called
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-            if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
-                User user = userRepository.findByUsername(auth.getName()).orElse(null);
-
-                if (user != null) {
-                    return ResponseEntity.ok(new AuthResponseDTO(
-                            "Login successful",
-                            user.getUsername(),
-                            user.getEmail(),
-                            user.getRole(),
-                            true
-                    ));
-                }
-            }
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponseDTO("Login failed", null, null, null, false));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponseDTO("Login failed: " + e.getMessage(), null, null, null, false));
-        }
-    }
-
     // Get current user info
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Not authenticated"));
+        }
 
-        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
-            User user = userRepository.findByUsername(auth.getName()).orElse(null);
+        // Check if user logged in via Google OAuth2
+        if (authentication.getPrincipal() instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+            String email = oauth2User.getAttribute("email");
+            String name = oauth2User.getAttribute("name");
+            String googleId = oauth2User.getAttribute("sub");
 
-            if (user != null) {
-                return ResponseEntity.ok(new AuthResponseDTO(
-                        "User found",
-                        user.getUsername(),
-                        user.getEmail(),
-                        user.getRole(),
-                        true
+            // Find or create user in your database
+            Optional<User> existingUser = userRepository.findByEmail(email);
+            User user;
+
+            if (existingUser.isPresent()) {
+                user = existingUser.get();
+                if (user.getGoogleId() == null) {
+                    user.setGoogleId(googleId);  // ← ADD THIS
+                    userRepository.save(user);
+                }
+            } else {
+                // Create new user for Google login
+                user = new User();
+                user.setUsername(name);
+                user.setEmail(email);
+                user.setGoogleId(googleId);
+                user.setPassword_hash(""); // No password for OAuth users
+                user.setRole(Role.ROLE_USER);
+                user = userRepository.save(user);
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "username", user.getUsername(),
+                    "email", user.getEmail(),
+                    "role", user.getRole().toString(),
+                    "authProvider", "google"
+            ));
+        }
+
+        // Handle regular username/password login (your existing code)
+        if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
+            org.springframework.security.core.userdetails.User userDetails =
+                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+            Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                return ResponseEntity.ok(Map.of(
+                        "username", user.getUsername(),
+                        "email", user.getEmail(),
+                        "role", user.getRole().toString(),
+                        "authProvider", "basic"
                 ));
             }
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new AuthResponseDTO("Not authenticated", null, null, null, false));
+                .body(Map.of("error", "User not found"));
     }
 
     // Logout endpoint
