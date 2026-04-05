@@ -45,8 +45,7 @@ public class RestSecurityConfig {
         // UPDATED: Added all 3 origins from CorsConfig
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",     // React
-                "http://10.0.2.2:8080",      // Android Emulator
-                "http://localhost:8080"      // Local testing
+                "http://10.0.2.2:8080"     // Android Emulator
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -67,7 +66,6 @@ public class RestSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // ADD THIS - OAuth2 endpoints
@@ -86,7 +84,7 @@ public class RestSecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.realmName("My App"))
                 // ADD THIS - Google OAuth2
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("http://localhost:5173/oauth2/success", true)
+                        .defaultSuccessUrl("http://localhost:5173/dashboard", true)
                         .failureUrl("http://localhost:5173/login?error=true")
                 );
 
