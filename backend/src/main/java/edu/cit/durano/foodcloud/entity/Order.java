@@ -19,6 +19,16 @@ public class Order {
     private BigDecimal totalAmount;
     private String status; // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
 
+    @Column(nullable = false)
+    private String building;
+
+    @Column(nullable = false)
+    private String roomNumber;
+
+    private String deliveryInstructions;
+
+    private String phoneNumber;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -37,7 +47,11 @@ public class Order {
         orderItem.setOrder(this);
     }
 
-    // getters and setters
+    // Helper method for full address
+    public String getFullAddress() {
+        return building + ", Room " + roomNumber;
+    }
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,12 +67,26 @@ public class Order {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
+    public String getBuilding() { return building; }
+    public void setBuilding(String building) { this.building = building; }
+
+    public String getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
+
+    public String getDeliveryInstructions() { return deliveryInstructions; }
+    public void setDeliveryInstructions(String deliveryInstructions) {
+        this.deliveryInstructions = deliveryInstructions;
+    }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
     public List<OrderItem> getOrderItems() { return orderItems; }
     public void setOrderItems(List<OrderItem> orderItems) { this.orderItems = orderItems; }
 
-    public Payment getPayments() { return payment; }
-    public void setPayments(Payment payments) { this.payment = payments; }
+    public Payment getPayment() { return payment; }
+    public void setPayment(Payment payment) { this.payment = payment; }
 }
