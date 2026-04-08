@@ -4,6 +4,8 @@ import edu.cit.durano.foodcloud.dto.ProductDto;
 import edu.cit.durano.foodcloud.entity.Product;
 import edu.cit.durano.foodcloud.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -20,6 +22,20 @@ public class ProductService {
         return toDto(saved);
     }
 
+    public List<ProductDto> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        List<ProductDto> dtos = new ArrayList<>();
+
+        for(Product product : products)  {
+            dtos.add(toDto(product));
+        }
+        return dtos;
+    }
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
     private ProductDto toDto(Product entity) {
         ProductDto dto = new ProductDto();
         dto.setId(entity.getId());
@@ -29,7 +45,6 @@ public class ProductService {
         dto.setSku(entity.getSku());
         dto.setStockQuantity(entity.getStockQuantity());
         dto.setImageUrl(entity.getImageUrl());
-
         return dto;
     }
 
@@ -41,7 +56,6 @@ public class ProductService {
         entity.setSku(dto.getSku());
         entity.setStockQuantity(dto.getStockQuantity());
         entity.setImageUrl(dto.getImageUrl());
-        // Note: category is set separately (need to fetch from DB)
         return entity;
     }
 
