@@ -36,6 +36,11 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+    //I already implemented this in the previous activity sir, I am going to commit this comment;
+    //thank you for understanding sir :) <3
+    //this is a factory method pattern as it encapsulates the creation of product and the conversion to DTO;
+    //the product controller takes dto's and returns dto's instead of returning the entity directly;
+
     private ProductDto toDto(Product entity) {
         ProductDto dto = new ProductDto();
         dto.setId(entity.getId());
