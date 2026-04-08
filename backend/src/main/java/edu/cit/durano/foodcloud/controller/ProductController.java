@@ -4,10 +4,9 @@ import edu.cit.durano.foodcloud.dto.ProductDto;
 import edu.cit.durano.foodcloud.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -22,5 +21,15 @@ public class ProductController {
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto dto) {
         ProductDto created = productService.createProduct(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping
+    public List<ProductDto> getAllProducts() {
+        return productService.getAllProducts();
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
     }
 }
