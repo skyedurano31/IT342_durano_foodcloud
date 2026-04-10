@@ -32,6 +32,27 @@ public class ProductService {
         return dtos;
     }
 
+    public ProductDto getProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        return toDto(product);
+    }
+
+    public ProductDto updateProduct(Long id, ProductDto dto) {
+        Product existing = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
+        if (dto.getName() != null) existing.setName(dto.getName());
+        if (dto.getDescription() != null) existing.setDescription(dto.getDescription());
+        if (dto.getPrice() != null) existing.setPrice(dto.getPrice());
+        if (dto.getStockQuantity() != null) existing.setStockQuantity(dto.getStockQuantity());
+        if (dto.getImageUrl() != null) existing.setImageUrl(dto.getImageUrl());
+        if (dto.getSku() != null) existing.setSku(dto.getSku());
+
+        Product updated = productRepository.save(existing);
+        return toDto(updated);
+    }
+
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
