@@ -58,6 +58,7 @@ public class CartItemDto {
     }
 
     public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) {this.subtotal = subtotal;};
 
     private void calculateSubtotal() {
         if (unitPrice != null && quantity != null) {

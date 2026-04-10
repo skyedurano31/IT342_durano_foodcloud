@@ -61,6 +61,10 @@ public class OrderItemDto {
 
     public BigDecimal getSubtotal() { return subtotal; }
 
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
+
     private void calculateSubtotal() {
         if (unitPrice != null && quantity != null) {
             this.subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));

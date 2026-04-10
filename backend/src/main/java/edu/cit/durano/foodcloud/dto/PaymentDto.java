@@ -24,12 +24,6 @@ public class PaymentDto {
 
     private Long orderId;
 
-    // COD specific fields
-    private Boolean codCollected;
-    private String codCollectedBy;
-
-    private String failureReason;
-
     // Constructors
     public PaymentDto() {}
 
@@ -54,13 +48,4 @@ public class PaymentDto {
 
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
-
-    public Boolean getCodCollected() { return codCollected; }
-    public void setCodCollected(Boolean codCollected) { this.codCollected = codCollected; }
-
-    public String getCodCollectedBy() { return codCollectedBy; }
-    public void setCodCollectedBy(String codCollectedBy) { this.codCollectedBy = codCollectedBy; }
-
-    public String getFailureReason() { return failureReason; }
-    public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
 }
