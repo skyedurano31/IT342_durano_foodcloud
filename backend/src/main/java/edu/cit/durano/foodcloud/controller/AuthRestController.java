@@ -69,28 +69,28 @@ public class AuthRestController {
             String name = oauth2User.getAttribute("name");
             String googleId = oauth2User.getAttribute("sub");
 
-            // Find or create user in your database
             Optional<User> existingUser = userRepository.findByEmail(email);
             User user;
 
             if (existingUser.isPresent()) {
                 user = existingUser.get();
                 if (user.getGoogleId() == null) {
-                    user.setGoogleId(googleId);  // ← ADD THIS
+                    user.setGoogleId(googleId);
                     userRepository.save(user);
                 }
             } else {
-                // Create new user for Google login
                 user = new User();
                 user.setUsername(name);
                 user.setEmail(email);
                 user.setGoogleId(googleId);
-                user.setPassword_hash(""); // No password for OAuth users
+                user.setPassword_hash("");
                 user.setRole(Role.ROLE_USER);
                 user = userRepository.save(user);
             }
 
+            // ✅ ADD THE ID HERE
             return ResponseEntity.ok(Map.of(
+                    "id", user.getId(),           // ← ADD THIS
                     "username", user.getUsername(),
                     "email", user.getEmail(),
                     "role", user.getRole().toString(),
@@ -98,7 +98,7 @@ public class AuthRestController {
             ));
         }
 
-        // Handle regular username/password login (your existing code)
+        // Handle regular username/password login
         if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
             org.springframework.security.core.userdetails.User userDetails =
                     (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
@@ -106,7 +106,9 @@ public class AuthRestController {
             Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
+                // ✅ ADD THE ID HERE
                 return ResponseEntity.ok(Map.of(
+                        "id", user.getId(),       // ← ADD THIS
                         "username", user.getUsername(),
                         "email", user.getEmail(),
                         "role", user.getRole().toString(),
