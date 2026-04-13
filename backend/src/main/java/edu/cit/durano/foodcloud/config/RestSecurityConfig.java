@@ -42,7 +42,6 @@ public class RestSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // UPDATED: Added all 3 origins from CorsConfig
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",     // React
                 "http://10.0.2.2:8080"     // Android Emulator
@@ -50,7 +49,7 @@ public class RestSecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);  // Added from CorsConfig
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -64,14 +63,12 @@ public class RestSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // ADD THIS - OAuth2 endpoints
+
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
-                        // Role-based endpoints
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
@@ -82,7 +79,7 @@ public class RestSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.realmName("My App"))
-                // ADD THIS - Google OAuth2
+                //google
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("http://localhost:5173/dashboard", true)
                         .failureUrl("http://localhost:5173/login?error=true")
