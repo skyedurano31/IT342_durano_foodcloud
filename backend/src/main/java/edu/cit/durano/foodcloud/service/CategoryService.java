@@ -5,6 +5,9 @@ import edu.cit.durano.foodcloud.entity.Category;
 import edu.cit.durano.foodcloud.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class CategoryService {
 
@@ -18,6 +21,17 @@ public class CategoryService {
         Category category = toEntity(dto);
         return toDto(categoryRepository.save(category));
     }
+
+   public List<CategoryDto> getAllCategories() {
+        List<Category> categories= categoryRepository.findAll();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+
+        for(Category category : categories) {
+            categoryDtos.add(toDto(category));
+        }
+        return categoryDtos;
+   }
+
 
     private Category toEntity(CategoryDto dto) {
         Category category = new Category();
