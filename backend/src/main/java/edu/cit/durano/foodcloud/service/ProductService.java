@@ -71,6 +71,12 @@ public class ProductService {
         dto.setSku(entity.getSku());
         dto.setStockQuantity(entity.getStockQuantity());
         dto.setImageUrl(entity.getImageUrl());
+
+        if (entity.getCategory() != null) {
+            dto.setCategoryId(entity.getCategory().getId());
+            dto.setCategoryName(entity.getCategory().getName());
+        }
+
         return dto;
     }
 
