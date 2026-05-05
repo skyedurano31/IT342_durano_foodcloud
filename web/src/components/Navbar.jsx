@@ -17,25 +17,47 @@ const Navbar = () => {
     return (
         <nav style={styles.nav}>
             <div style={styles.container}>
-                <Link to="/products" style={styles.logo}>🛒 FoodCloud</Link>
+                <Link 
+                    to={user?.role === 'ROLE_ADMIN' ? '/admin' : '/dashboard'} 
+                    style={styles.logo}
+                >
+                    <img 
+                        src="/images/logo.png"  // Put your image in public/images/
+                        alt="FoodCloud Logo"
+                        style={styles.logoImage}
+                    />
+                    <span style={styles.logoText}>FoodCloud</span>
+                </Link>
                 <div style={styles.links}>
-                    <Link to="/products" style={styles.link}>Products</Link>
-                    {user && (
+                    {user?.role === 'ROLE_ADMIN' ? (
                         <>
-                            <Link to="/cart" style={styles.link}>
-                                Cart ({cartCount})
-                            </Link>
-                            <Link to="/orders" style={styles.link}>Orders</Link>
-                            <span style={styles.user}>Hi, {user.username}</span>
+                            <Link to="/admin" style={styles.link}>Dashboard</Link>
+                            <span style={styles.user}>👤 {user.username} (Admin)</span>
                             <button onClick={handleLogout} style={styles.logoutBtn}>
                                 Logout
                             </button>
                         </>
-                    )}
-                    {!user && (
+                    ) : (
                         <>
-                            <Link to="/login" style={styles.link}>Login</Link>
-                            <Link to="/register" style={styles.link}>Register</Link>
+                            <Link to="/products" style={styles.link}>Products</Link>
+                            {user && (
+                                <>
+                                    <Link to="/cart" style={styles.link}>
+                                        Cart ({cartCount})
+                                    </Link>
+                                    <Link to="/orders" style={styles.link}>Orders</Link>
+                                    <span style={styles.user}>Hi, {user.username}</span>
+                                    <button onClick={handleLogout} style={styles.logoutBtn}>
+                                        Logout
+                                    </button>
+                                </>
+                            )}
+                            {!user && (
+                                <>
+                                    <Link to="/login" style={styles.link}>Login</Link>
+                                    <Link to="/register" style={styles.link}>Register</Link>
+                                </>
+                            )}
                         </>
                     )}
                 </div>
@@ -46,13 +68,14 @@ const Navbar = () => {
 
 const styles = {
     nav: {
-        background: '#2c3e50',
-        padding: '15px 0',
-        color: 'white',
+        background: '#ffffff',
+        padding: '12px 0',
+        color: '#333',
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        borderBottom: '1px solid #f0f0f0'
     },
     container: {
         maxWidth: '1200px',
@@ -64,10 +87,11 @@ const styles = {
         flexWrap: 'wrap'
     },
     logo: {
-        color: 'white',
+        color: '#2c3e50',
         textDecoration: 'none',
-        fontSize: '20px',
-        fontWeight: 'bold'
+        fontSize: '18px',
+        fontWeight: '600',
+        letterSpacing: '0.5px'
     },
     links: {
         display: 'flex',
@@ -76,22 +100,40 @@ const styles = {
         flexWrap: 'wrap'
     },
     link: {
-        color: 'white',
+        color: '#555',
         textDecoration: 'none',
-        transition: 'opacity 0.3s'
+        fontSize: '14px',
+        transition: 'color 0.2s',
+        ':hover': {
+            color: '#007bff'
+        }
     },
     user: {
-        color: '#ecf0f1'
+        color: '#black',
+        fontSize: '13px'
     },
     logoutBtn: {
-        padding: '5px 10px',
-        background: '#e74c3c',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
+        padding: '6px 14px',
+        background: '#f5f5f5',
+        color: '#555',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
         cursor: 'pointer',
-        transition: 'opacity 0.3s'
-    }
+        fontSize: '13px',
+        transition: 'all 0.2s',
+        ':hover': {
+            background: '#eee'
+        }
+    },
+    logoImage: {
+    width: '30px',
+    height: '30px',
+    marginRight: '8px',
+    verticalAlign: 'middle'
+},
+logoText: {
+    verticalAlign: 'middle'
+}
 };
 
 export default Navbar;

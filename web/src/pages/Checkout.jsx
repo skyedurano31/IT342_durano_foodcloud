@@ -19,7 +19,6 @@ const Checkout = () => {
         deliveryInstructions: ''
     });
 
-    // Check if cart exists and has items
     useEffect(() => {
         if (user && !cart) {
             fetchCart();
@@ -36,8 +35,8 @@ const Checkout = () => {
     if (!hasItems && !loading) {
         return (
             <div style={styles.empty}>
-                <h2>Your cart is empty</h2>
-                <p>Add items to your cart before checking out</p>
+                <h2 style={styles.emptyTitle}>Your cart is empty</h2>
+                <p style={styles.emptyText}>Add items to your cart before checking out</p>
                 <button onClick={() => navigate('/products')} style={styles.shopBtn}>
                     Browse Products
                 </button>
@@ -51,7 +50,7 @@ const Checkout = () => {
         return sum + (unitPrice * quantity);
     }, 0) || 0;
     
-    const tax = subtotal * 0.1;
+    const tax = subtotal * 0.05;
     const total = subtotal + tax;
 
     const handleChange = (e) => {
@@ -65,7 +64,6 @@ const Checkout = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate form
         if (!form.building.trim()) {
             setError('Building is required');
             return;
@@ -92,25 +90,18 @@ const Checkout = () => {
                 phoneNumber: form.phoneNumber
             };
             
-            console.log('Placing order:', orderData);
-            
             const response = await axiosInstance.post('/api/orders/checkout', orderData);
-            
-            console.log('Order placed successfully:', response.data);
             
             setSuccess('Order placed successfully! Redirecting...');
             
-            // Clear the cart
             await clearCart();
             
-            // Redirect to orders page after 2 seconds
             setTimeout(() => {
                 navigate('/orders');
             }, 2000);
             
         } catch (error) {
             console.error('Checkout error:', error);
-            console.error('Error response:', error.response?.data);
             
             if (error.response?.data?.message) {
                 setError(error.response.data.message);
@@ -128,13 +119,13 @@ const Checkout = () => {
             
             {error && (
                 <div style={styles.error}>
-                    ❌ {error}
+                    {error}
                 </div>
             )}
             
             {success && (
                 <div style={styles.success}>
-                    ✅ {success}
+                    {success}
                 </div>
             )}
             
@@ -149,7 +140,6 @@ const Checkout = () => {
                             name="building"
                             value={form.building}
                             onChange={handleChange}
-                            placeholder="e.g., Building A, Dormitory Name"
                             style={styles.input}
                             required
                             disabled={loading}
@@ -163,7 +153,6 @@ const Checkout = () => {
                             name="roomNumber"
                             value={form.roomNumber}
                             onChange={handleChange}
-                            placeholder="e.g., 301, Room 12"
                             style={styles.input}
                             required
                             disabled={loading}
@@ -177,7 +166,6 @@ const Checkout = () => {
                             name="phoneNumber"
                             value={form.phoneNumber}
                             onChange={handleChange}
-                            placeholder="e.g., 09123456789"
                             style={styles.input}
                             required
                             disabled={loading}
@@ -190,7 +178,6 @@ const Checkout = () => {
                             name="deliveryInstructions"
                             value={form.deliveryInstructions}
                             onChange={handleChange}
-                            placeholder="e.g., Gate 2, near the fountain, call when arrived..."
                             rows="3"
                             style={styles.textarea}
                             disabled={loading}
@@ -202,44 +189,46 @@ const Checkout = () => {
                         style={styles.placeOrderBtn}
                         disabled={loading}
                     >
-                        {loading ? 'Placing Order...' : `Place Order (₱${total.toFixed(2)})`}
+                        {loading ? 'Placing Order...' : `Place Order • ₱${total.toFixed(2)}`}
                     </button>
                 </form>
                 
                 <div style={styles.summary}>
                     <h2 style={styles.summaryTitle}>Order Summary</h2>
                     
-                    {cart?.items?.map(item => {
-                        const unitPrice = parseFloat(item.unitPrice) || 0;
-                        const quantity = parseInt(item.quantity) || 0;
-                        const itemTotal = unitPrice * quantity;
-                        
-                        return (
-                            <div key={item.id} style={styles.summaryItem}>
-                                <div style={styles.summaryItemInfo}>
-                                    <span style={styles.summaryItemName}>{item.productName}</span>
-                                    <span style={styles.summaryItemQty}>x{quantity}</span>
+                    <div style={styles.itemsList}>
+                        {cart?.items?.map(item => {
+                            const unitPrice = parseFloat(item.unitPrice) || 0;
+                            const quantity = parseInt(item.quantity) || 0;
+                            const itemTotal = unitPrice * quantity;
+                            
+                            return (
+                                <div key={item.id} style={styles.summaryItem}>
+                                    <div>
+                                        <span style={styles.summaryItemName}>{item.productName}</span>
+                                        <span style={styles.summaryItemQty}> x{quantity}</span>
+                                    </div>
+                                    <span style={styles.summaryItemPrice}>₱{itemTotal.toFixed(2)}</span>
                                 </div>
-                                <span style={styles.summaryItemPrice}>₱{itemTotal.toFixed(2)}</span>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                     
                     <div style={styles.divider}></div>
                     
                     <div style={styles.summaryRow}>
-                        <span>Subtotal:</span>
+                        <span>Subtotal</span>
                         <span>₱{subtotal.toFixed(2)}</span>
                     </div>
                     
                     <div style={styles.summaryRow}>
-                        <span>Tax (10%):</span>
-                        <span>₱{tax.toFixed(2)}</span>
+                        <span>Delivery fee</span>
+                        <span>₱{tax.toFixed(0)}</span>
                     </div>
                     
                     <div style={styles.totalRow}>
-                        <span>Total:</span>
-                        <span style={styles.totalAmount}>₱{total.toFixed(2)}</span>
+                        <span>Total</span>
+                        <span style={styles.totalAmount}>₱{total.toFixed(0)}</span>
                     </div>
                 </div>
             </div>
@@ -251,159 +240,205 @@ const styles = {
     container: {
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '20px',
-        minHeight: 'calc(100vh - 80px)'
+        padding: '30px 20px',
+        minHeight: 'calc(100vh - 80px)',
+        backgroundColor: '#fafafa'
     },
     title: {
+        fontSize: '28px',
+        fontWeight: '500',
+        color: '#800000',
         marginBottom: '30px',
-        color: '#333',
-        fontSize: '28px'
+        paddingBottom: '10px',
+        borderBottom: '2px solid #800000'
     },
     error: {
         backgroundColor: '#f8d7da',
         color: '#721c24',
-        padding: '12px',
-        borderRadius: '5px',
+        padding: '10px 15px',
+        borderRadius: '4px',
         marginBottom: '20px',
-        border: '1px solid #f5c6cb'
+        fontSize: '13px'
     },
     success: {
         backgroundColor: '#d4edda',
         color: '#155724',
-        padding: '12px',
-        borderRadius: '5px',
+        padding: '10px 15px',
+        borderRadius: '4px',
         marginBottom: '20px',
-        border: '1px solid #c3e6cb'
+        fontSize: '13px'
     },
     content: {
         display: 'grid',
-        gridTemplateColumns: '1fr 350px',
+        gridTemplateColumns: '1fr 320px',
         gap: '30px'
     },
     form: {
-        backgroundColor: 'white',
-        borderRadius: '10px',
+        backgroundColor: '#fff',
+        borderRadius: '8px',
         padding: '25px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        border: '1px solid #eee',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
     },
     sectionTitle: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#800000',
         marginTop: 0,
         marginBottom: '20px',
-        color: '#333',
-        fontSize: '18px'
+        paddingBottom: '8px',
+        borderBottom: '1px solid #eee'
     },
     formGroup: {
-        marginBottom: '20px'
+        marginBottom: '18px'
+    },
+    label: {
+        display: 'block',
+        marginBottom: '5px',
+        fontSize: '13px',
+        fontWeight: '500',
+        color: '#555'
     },
     input: {
         width: '100%',
-        padding: '10px',
+        padding: '10px 12px',
         border: '1px solid #ddd',
-        borderRadius: '5px',
-        fontSize: '14px',
-        marginTop: '5px'
+        borderRadius: '4px',
+        fontSize: '13px',
+        marginTop: '5px',
+        transition: 'border-color 0.2s'
     },
     textarea: {
         width: '100%',
-        padding: '10px',
+        padding: '10px 12px',
         border: '1px solid #ddd',
-        borderRadius: '5px',
-        fontSize: '14px',
+        borderRadius: '4px',
+        fontSize: '13px',
         fontFamily: 'inherit',
         marginTop: '5px',
         resize: 'vertical'
     },
     placeOrderBtn: {
         width: '100%',
-        padding: '15px',
-        backgroundColor: '#28a745',
+        padding: '12px',
+        backgroundColor: '#800000',
         color: 'white',
         border: 'none',
-        borderRadius: '5px',
+        borderRadius: '4px',
         cursor: 'pointer',
-        fontSize: '16px',
-        fontWeight: 'bold',
-        marginTop: '10px'
+        fontSize: '14px',
+        fontWeight: '600',
+        marginTop: '15px',
+        transition: 'background 0.2s'
     },
     summary: {
-        backgroundColor: 'white',
-        borderRadius: '10px',
+        backgroundColor: '#fff',
+        borderRadius: '8px',
         padding: '25px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        border: '1px solid #eee',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         height: 'fit-content',
         position: 'sticky',
         top: '80px'
     },
     summaryTitle: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#800000',
         marginTop: 0,
         marginBottom: '20px',
-        color: '#333',
-        fontSize: '18px'
+        paddingBottom: '8px',
+        borderBottom: '1px solid #eee'
+    },
+    itemsList: {
+        marginBottom: '15px'
     },
     summaryItem: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '10px 0',
-        borderBottom: '1px solid #eee'
-    },
-    summaryItemInfo: {
-        display: 'flex',
-        gap: '10px',
-        alignItems: 'center'
+        padding: '8px 0',
+        borderBottom: '1px solid #f0f0f0'
     },
     summaryItemName: {
+        fontSize: '13px',
         color: '#333'
     },
     summaryItemQty: {
-        color: '#666',
-        fontSize: '12px'
+        fontSize: '11px',
+        color: '#888',
+        marginLeft: '5px'
     },
     summaryItemPrice: {
-        fontWeight: 'bold',
-        color: '#e67e22'
+        fontSize: '13px',
+        fontWeight: '500',
+        color: '#800000'
     },
     divider: {
         height: '1px',
-        backgroundColor: '#ddd',
+        backgroundColor: '#eee',
         margin: '15px 0'
     },
     summaryRow: {
         display: 'flex',
         justifyContent: 'space-between',
-        marginBottom: '10px',
-        color: '#666'
+        marginBottom: '8px',
+        fontSize: '13px',
+        color: '#555'
     },
     totalRow: {
         display: 'flex',
         justifyContent: 'space-between',
         marginTop: '15px',
-        paddingTop: '15px',
-        borderTop: '2px solid #ddd',
-        fontSize: '18px',
-        fontWeight: 'bold'
+        paddingTop: '12px',
+        borderTop: '1px solid #ddd',
+        fontSize: '16px',
+        fontWeight: '600'
     },
     totalAmount: {
-        color: '#e67e22',
-        fontSize: '20px'
+        color: '#800000',
+        fontSize: '18px'
     },
     empty: {
         textAlign: 'center',
         padding: '80px 20px',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '10px',
-        marginTop: '50px'
+        backgroundColor: '#fff',
+        borderRadius: '8px',
+        marginTop: '40px',
+        border: '1px solid #eee'
+    },
+    emptyTitle: {
+        fontSize: '20px',
+        color: '#800000',
+        marginBottom: '10px'
+    },
+    emptyText: {
+        color: '#666',
+        fontSize: '14px'
     },
     shopBtn: {
-        padding: '12px 30px',
-        backgroundColor: '#007bff',
+        padding: '10px 24px',
+        backgroundColor: '#800000',
         color: 'white',
         border: 'none',
-        borderRadius: '5px',
+        borderRadius: '4px',
         cursor: 'pointer',
-        fontSize: '16px',
+        fontSize: '14px',
         marginTop: '20px'
     }
 };
+
+// Add hover effects
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+    button:hover {
+        opacity: 0.9;
+    }
+    input:focus, textarea:focus {
+        outline: none;
+        border-color: #800000;
+    }
+`;
+document.head.appendChild(styleSheet);
 
 export default Checkout;

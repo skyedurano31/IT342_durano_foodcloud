@@ -8,6 +8,7 @@ const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [expandedOrder, setExpandedOrder] = useState(null);
 
     useEffect(() => {
         if (user?.id) {
@@ -31,6 +32,10 @@ const Orders = () => {
         }
     };
 
+    const toggleOrderDetails = (orderId) => {
+        setExpandedOrder(expandedOrder === orderId ? null : orderId);
+    };
+
     if (userLoading || loading) {
         return <div style={styles.loading}>Loading orders...</div>;
     }
@@ -42,8 +47,8 @@ const Orders = () => {
     if (orders.length === 0) {
         return (
             <div style={styles.empty}>
-                <h2>No orders yet</h2>
-                <p>Start shopping to see your orders here!</p>
+                <h2 style={styles.emptyTitle}>No orders yet</h2>
+                <p style={styles.emptyText}>Start shopping to see your orders here!</p>
                 <button onClick={() => window.location.href = '/products'} style={styles.shopBtn}>
                     Browse Products
                 </button>
@@ -60,35 +65,74 @@ const Orders = () => {
                     <div key={order.id} style={styles.orderCard}>
                         <div style={styles.orderHeader}>
                             <div>
-                                <span style={styles.orderId}>Order #{order.id}</span>
+                                <span style={styles.orderId}>Order #{order.orderNumber || order.id}</span>
                                 <span style={styles.orderDate}>
-                                    {new Date(order.createdAt).toLocaleDateString()}
+                                    {new Date(order.orderDate || order.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
                             <span style={{
                                 ...styles.orderStatus,
-                                backgroundColor: order.status === 'DELIVERED' ? '#d4edda' : 
-                                               order.status === 'CANCELLED' ? '#f8d7da' : '#fff3cd',
-                                color: order.status === 'DELIVERED' ? '#155724' :
-                                       order.status === 'CANCELLED' ? '#721c24' : '#856404'
+                                backgroundColor: getStatusBgColor(order.status),
+                                color: getStatusTextColor(order.status)
                             }}>
                                 {order.status || 'PENDING'}
                             </span>
                         </div>
                         
-                        <div style={styles.orderDetails}>
-                            <div style={styles.deliveryInfo}>
-                                <p><strong>Delivery Address:</strong> {order.building}, Room {order.roomNumber}</p>
-                                <p><strong>Phone:</strong> {order.phoneNumber}</p>
-                                {order.deliveryInstructions && (
-                                    <p><strong>Instructions:</strong> {order.deliveryInstructions}</p>
-                                )}
+                        <div style={styles.orderSummary}>
+                            <div style={styles.summaryItem}>
+                                <strong>Location:</strong> {order.building}, Room {order.roomNumber}
                             </div>
-                            
-                            <div style={styles.orderTotal}>
-                                <strong>Total Amount:</strong> ₱{parseFloat(order.totalAmount).toFixed(2)}
+                            <div style={styles.summaryItem}>
+                                <strong>Phone:</strong> {order.phoneNumber}
+                            </div>
+                            <div style={styles.summaryItem}>
+                                <strong>Total:</strong> <span style={styles.totalAmount}>₱{parseFloat(order.totalAmount).toFixed(2)}</span>
                             </div>
                         </div>
+
+                        {order.deliveryInstructions && (
+                            <div style={styles.instructions}>
+                                <strong>Instructions:</strong> {order.deliveryInstructions}
+                            </div>
+                        )}
+
+                        <button 
+                            onClick={() => toggleOrderDetails(order.id)}
+                            style={styles.detailsBtn}
+                        >
+                            {expandedOrder === order.id ? '▼ Hide Items' : '▶ View Items'}
+                        </button>
+
+                        {expandedOrder === order.id && (
+                            <div style={styles.orderItems}>
+                                <h4 style={styles.itemsTitle}>Order Items</h4>
+                                <table style={styles.itemsTable}>
+                                    <thead>
+                                        <tr>
+                                            <th style={styles.th}>Product</th>
+                                            <th style={styles.th}>Qty</th>
+                                            <th style={styles.th}>Price</th>
+                                            <th style={styles.th}>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {order.items && order.items.map((item, idx) => (
+                                            <tr key={idx}>
+                                                <td style={styles.td}>{item.productName}</td>
+                                                <td style={styles.tdCenter}>{item.quantity}</td>
+                                                <td style={styles.tdRight}>₱{parseFloat(item.unitPrice).toFixed(2)}</td>
+                                                <td style={styles.tdRight}>₱{parseFloat(item.subtotal).toFixed(2)}</td>
+                                            </tr>
+                                        ))}
+                                        <tr style={styles.totalRow}>
+                                            <td colSpan="3" style={styles.tdRight}><strong>Total</strong></td>
+                                            <td style={styles.tdRight}><strong>₱{parseFloat(order.totalAmount).toFixed(2)}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -96,44 +140,77 @@ const Orders = () => {
     );
 };
 
+const getStatusBgColor = (status) => {
+    switch(status) {
+        case 'DELIVERED': return '#d4edda';
+        case 'CANCELLED': return '#f8d7da';
+        case 'PREPARING': return '#cce5ff';
+        default: return '#fff3cd';
+    }
+};
+
+const getStatusTextColor = (status) => {
+    switch(status) {
+        case 'DELIVERED': return '#155724';
+        case 'CANCELLED': return '#721c24';
+        case 'PREPARING': return '#004085';
+        default: return '#856404';
+    }
+};
+
 const styles = {
     container: {
-        maxWidth: '1200px',
+        maxWidth: '900px',
         margin: '0 auto',
-        padding: '20px',
-        minHeight: 'calc(100vh - 80px)'
+        padding: '30px 20px',
+        minHeight: 'calc(100vh - 80px)',
+        backgroundColor: '#fafafa'
     },
     title: {
+        fontSize: '28px',
+        fontWeight: '500',
+        color: '#800000',
         marginBottom: '30px',
-        color: '#333',
-        fontSize: '28px'
+        paddingBottom: '10px',
+        borderBottom: '2px solid #800000'
     },
     loading: {
         textAlign: 'center',
-        padding: '50px',
-        fontSize: '18px',
+        padding: '60px',
+        fontSize: '14px',
         color: '#666'
     },
     error: {
         textAlign: 'center',
-        padding: '50px',
-        color: '#dc3545'
+        padding: '60px',
+        color: '#800000',
+        fontSize: '14px'
     },
     empty: {
         textAlign: 'center',
         padding: '80px 20px',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '10px',
-        marginTop: '50px'
+        backgroundColor: '#fff',
+        borderRadius: '8px',
+        marginTop: '40px',
+        border: '1px solid #eee'
+    },
+    emptyTitle: {
+        fontSize: '20px',
+        color: '#800000',
+        marginBottom: '10px'
+    },
+    emptyText: {
+        color: '#666',
+        fontSize: '14px'
     },
     shopBtn: {
-        padding: '12px 30px',
-        backgroundColor: '#007bff',
+        padding: '10px 24px',
+        backgroundColor: '#800000',
         color: 'white',
         border: 'none',
-        borderRadius: '5px',
+        borderRadius: '4px',
         cursor: 'pointer',
-        fontSize: '16px',
+        fontSize: '14px',
         marginTop: '20px'
     },
     ordersList: {
@@ -142,47 +219,109 @@ const styles = {
         gap: '20px'
     },
     orderCard: {
-        backgroundColor: 'white',
-        borderRadius: '10px',
+        backgroundColor: '#fff',
+        borderRadius: '8px',
         padding: '20px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        border: '1px solid #eee',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
     },
     orderHeader: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '15px',
-        paddingBottom: '15px',
+        paddingBottom: '12px',
         borderBottom: '1px solid #eee'
     },
     orderId: {
-        fontWeight: 'bold',
-        fontSize: '16px',
+        fontWeight: '600',
+        fontSize: '15px',
+        color: '#333',
         marginRight: '15px'
     },
     orderDate: {
-        color: '#666',
-        fontSize: '14px'
+        color: '#888',
+        fontSize: '12px'
     },
     orderStatus: {
-        padding: '5px 10px',
-        borderRadius: '5px',
-        fontSize: '12px',
-        fontWeight: 'bold'
+        padding: '4px 10px',
+        borderRadius: '20px',
+        fontSize: '11px',
+        fontWeight: '600'
     },
-    orderDetails: {
+    orderSummary: {
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
         flexWrap: 'wrap',
-        gap: '15px'
+        gap: '20px',
+        marginBottom: '12px',
+        fontSize: '13px'
     },
-    deliveryInfo: {
-        flex: 1
+    summaryItem: {
+        color: '#555'
     },
-    orderTotal: {
-        fontSize: '18px',
-        color: '#e67e22'
+    totalAmount: {
+        color: '#800000',
+        fontWeight: '600'
+    },
+    instructions: {
+        marginTop: '10px',
+        marginBottom: '15px',
+        padding: '8px 12px',
+        backgroundColor: '#f5f5f5',
+        borderRadius: '4px',
+        fontSize: '12px',
+        color: '#666'
+    },
+    detailsBtn: {
+        marginTop: '12px',
+        background: 'none',
+        border: 'none',
+        color: '#800000',
+        cursor: 'pointer',
+        fontSize: '12px',
+        padding: '5px 0',
+        fontWeight: '500'
+    },
+    orderItems: {
+        marginTop: '15px',
+        paddingTop: '15px',
+        borderTop: '1px solid #eee'
+    },
+    itemsTitle: {
+        fontSize: '14px',
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: '12px'
+    },
+    itemsTable: {
+        width: '100%',
+        borderCollapse: 'collapse',
+        fontSize: '12px'
+    },
+    th: {
+        textAlign: 'left',
+        padding: '8px',
+        backgroundColor: '#f5f5f5',
+        borderBottom: '1px solid #ddd',
+        fontWeight: '600'
+    },
+    td: {
+        padding: '8px',
+        borderBottom: '1px solid #eee'
+    },
+    tdCenter: {
+        padding: '8px',
+        textAlign: 'center',
+        borderBottom: '1px solid #eee'
+    },
+    tdRight: {
+        padding: '8px',
+        textAlign: 'right',
+        borderBottom: '1px solid #eee'
+    },
+    totalRow: {
+        backgroundColor: '#fafafa',
+        fontWeight: '600'
     }
 };
 
