@@ -17,7 +17,7 @@ public class Order {
     private String orderNumber;
     private LocalDateTime orderDate;
     private BigDecimal totalAmount;
-    private String status; // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+    private String status; // PENDING, CONFIRMED,DELIVERED;
 
     @Column(nullable = false)
     private String building;
