@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.dto;
+package edu.cit.durano.foodcloud.features.authentication;
 
 // LoginRequest.java
 public class LoginRequestDTO {

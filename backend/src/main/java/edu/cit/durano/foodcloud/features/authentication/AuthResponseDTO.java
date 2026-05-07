@@ -1,6 +1,4 @@
-package edu.cit.durano.foodcloud.dto;
-
-import edu.cit.durano.foodcloud.features.authentication.Role;
+package edu.cit.durano.foodcloud.features.authentication;
 
 public class AuthResponseDTO {
     private String message;
