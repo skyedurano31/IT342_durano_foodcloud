@@ -1,8 +1,6 @@
 package edu.cit.durano.foodcloud.features.authentication;
 
 import edu.cit.durano.foodcloud.dto.AuthResponseDTO;
-import edu.cit.durano.foodcloud.entity.Role;
-import edu.cit.durano.foodcloud.entity.User;
 import edu.cit.durano.foodcloud.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

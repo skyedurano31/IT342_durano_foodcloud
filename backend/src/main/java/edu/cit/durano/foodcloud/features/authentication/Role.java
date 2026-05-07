@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.entity;
+package edu.cit.durano.foodcloud.features.authentication;
 
 public enum Role {
     ROLE_ADMIN,

@@ -1,5 +1,6 @@
 package edu.cit.durano.foodcloud.entity;
 
+import edu.cit.durano.foodcloud.features.authentication.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;

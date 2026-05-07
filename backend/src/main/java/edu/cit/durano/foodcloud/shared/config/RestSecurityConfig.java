@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.config;
+package edu.cit.durano.foodcloud.shared.config;
 
 import edu.cit.durano.foodcloud.features.authentication.User;
 import edu.cit.durano.foodcloud.repository.UserRepository;

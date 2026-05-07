@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.dto;
+package edu.cit.durano.foodcloud.features.authentication;
 
 import jakarta.validation.constraints.*;
 

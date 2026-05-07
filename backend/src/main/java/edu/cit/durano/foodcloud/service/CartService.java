@@ -5,7 +5,7 @@ import edu.cit.durano.foodcloud.dto.CartItemDto;
 import edu.cit.durano.foodcloud.entity.Cart;
 import edu.cit.durano.foodcloud.entity.CartItem;
 import edu.cit.durano.foodcloud.entity.Product;
-import edu.cit.durano.foodcloud.entity.User;
+import edu.cit.durano.foodcloud.features.authentication.User;
 import edu.cit.durano.foodcloud.repository.CartItemRepository;
 import edu.cit.durano.foodcloud.repository.CartRepository;
 import edu.cit.durano.foodcloud.repository.ProductRepository;
