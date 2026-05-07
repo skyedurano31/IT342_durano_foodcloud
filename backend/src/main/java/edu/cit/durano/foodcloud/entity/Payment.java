@@ -16,7 +16,7 @@ public class Payment {
     private BigDecimal amount;
     private LocalDateTime paymentDate;
     private String status; // PENDING, COMPLETED, FAILED, REFUNDED
-    private String paymentMethod; // CREDIT_CARD, PAYPAL, etc.
+    private String paymentMethod; // COD OR GCASH
     private String transactionId;
 
     @OneToOne(fetch = FetchType.LAZY)
