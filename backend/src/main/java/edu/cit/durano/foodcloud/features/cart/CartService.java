@@ -1,8 +1,8 @@
 package edu.cit.durano.foodcloud.features.cart;
 
-import edu.cit.durano.foodcloud.entity.Product;
+import edu.cit.durano.foodcloud.features.products.Product;
 import edu.cit.durano.foodcloud.features.authentication.User;
-import edu.cit.durano.foodcloud.repository.ProductRepository;
+import edu.cit.durano.foodcloud.features.products.ProductRepository;
 import edu.cit.durano.foodcloud.features.authentication.UserRepository;
 import org.springframework.stereotype.Service;
 

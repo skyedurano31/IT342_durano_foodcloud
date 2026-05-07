@@ -1,6 +1,6 @@
 package edu.cit.durano.foodcloud.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import edu.cit.durano.foodcloud.features.products.Product;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

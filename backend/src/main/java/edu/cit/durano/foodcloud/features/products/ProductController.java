@@ -1,7 +1,5 @@
-package edu.cit.durano.foodcloud.controller;
+package edu.cit.durano.foodcloud.features.products;
 
-import edu.cit.durano.foodcloud.dto.ProductDto;
-import edu.cit.durano.foodcloud.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

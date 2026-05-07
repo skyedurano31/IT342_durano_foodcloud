@@ -8,6 +8,8 @@ import edu.cit.durano.foodcloud.features.cart.Cart;
 import edu.cit.durano.foodcloud.features.cart.CartItem;
 import edu.cit.durano.foodcloud.features.cart.CartItemRepository;
 import edu.cit.durano.foodcloud.features.cart.CartRepository;
+import edu.cit.durano.foodcloud.features.products.Product;
+import edu.cit.durano.foodcloud.features.products.ProductRepository;
 import edu.cit.durano.foodcloud.repository.*;
 import org.springframework.stereotype.Service;
 

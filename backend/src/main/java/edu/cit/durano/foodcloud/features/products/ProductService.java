@@ -1,8 +1,5 @@
-package edu.cit.durano.foodcloud.service;
+package edu.cit.durano.foodcloud.features.products;
 
-import edu.cit.durano.foodcloud.dto.ProductDto;
-import edu.cit.durano.foodcloud.entity.Product;
-import edu.cit.durano.foodcloud.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
