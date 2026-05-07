@@ -1,17 +1,19 @@
 // src/pages/Products.jsx
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useCart } from '../hooks/useCart';
 import axiosInstance from '../api/axiosConfig';
 
 const Products = () => {
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const categoryId = searchParams.get('categoryId');
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(categoryId || '');
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState('success');
@@ -32,13 +34,20 @@ const Products = () => {
     useEffect(() => {
         if (selectedCategory) {
             const filtered = products.filter(product => {
-                return String(product.categoryId) === String(selectedCategory);
+                const categoryMatch = String(product.categoryId) === String(selectedCategory);
+                const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                   (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+                return categoryMatch && searchMatch;
             });
             setFilteredProducts(filtered);
         } else {
-            setFilteredProducts(products);
+            const filtered = products.filter(product => {
+                return product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+            });
+            setFilteredProducts(filtered);
         }
-    }, [selectedCategory, products]);
+    }, [selectedCategory, products, searchQuery]);
 
     const fetchProducts = async () => {
         try {
@@ -119,23 +128,42 @@ const Products = () => {
                     </button>
                 ))}
             </div>
+
+            {/* Search Bar */}
+            <div style={styles.searchContainer}>
+                <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={styles.searchInput}
+                />
+            </div>
             
             <div style={styles.grid}>
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map(product => (
                         <div key={product.id} style={styles.card}>
-                            {product.imageUrl && (
-                                <img 
-                                    src={product.imageUrl} 
-                                    alt={product.name}
-                                    style={styles.productImage}
-                                />
-                            )}
-                            <h3 style={styles.productName}>{product.name}</h3>
-                            <p style={styles.productDesc}>{product.description || 'Delicious food item'}</p>
-                            <div style={styles.price}>₱{parseFloat(product.price).toFixed(2)}</div>
+                            <div 
+                                style={styles.cardClickable}
+                                onClick={() => navigate(`/products/${product.id}`)}
+                            >
+                                {product.imageUrl && (
+                                    <img 
+                                        src={product.imageUrl} 
+                                        alt={product.name}
+                                        style={styles.productImage}
+                                    />
+                                )}
+                                <h3 style={styles.productName}>{product.name}</h3>
+                                <p style={styles.productDesc}>{product.description || 'Delicious food item'}</p>
+                                <div style={styles.price}>₱{parseFloat(product.price).toFixed(2)}</div>
+                            </div>
                             <button 
-                                onClick={() => handleAddToCart(product.id, product.name)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddToCart(product.id, product.name);
+                                }}
                                 style={styles.button}
                                 disabled={cartLoading}
                             >
@@ -145,7 +173,7 @@ const Products = () => {
                     ))
                 ) : (
                     <div style={styles.emptyState}>
-                        <p>No products found in this category.</p>
+                        <p>No products found {searchQuery ? 'matching your search' : 'in this category'}.</p>
                     </div>
                 )}
             </div>
@@ -186,6 +214,22 @@ const styles = {
         textAlign: 'center',
         fontSize: '13px'
     },
+    searchContainer: {
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    searchInput: {
+        width: '100%',
+        maxWidth: '400px',
+        padding: '12px 16px',
+        fontSize: '14px',
+        border: '1px solid #ddd',
+        borderRadius: '25px',
+        outline: 'none',
+        transition: 'all 0.2s',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+    },
     grid: { 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
@@ -197,7 +241,14 @@ const styles = {
         padding: '20px', 
         background: 'white', 
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        transition: 'transform 0.2s, box-shadow 0.2s'
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    cardClickable: {
+        cursor: 'pointer',
+        flex: 1,
+        marginBottom: '15px'
     },
     productImage: { 
         width: '100%', 

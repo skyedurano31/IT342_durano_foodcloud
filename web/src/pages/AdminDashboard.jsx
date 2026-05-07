@@ -4,6 +4,9 @@ import axiosInstance from '../api/axiosConfig';
 
 const AdminDashboard = () => {
     const { user, logout } = useUser();
+    const [activeTab, setActiveTab] = useState('orders');
+    
+    // Orders
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -11,11 +14,32 @@ const AdminDashboard = () => {
     const [message, setMessage] = useState('');
     const [expandedOrder, setExpandedOrder] = useState(null);
 
+    // Products
+    const [showProductForm, setShowProductForm] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+        price: '',
+        categoryId: ''
+    });
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [productsLoading, setProductsLoading] = useState(false);
+
     const orderStatuses = ['PENDING', 'PREPARING', 'DELIVERED', 'CANCELLED'];
 
     useEffect(() => {
         fetchAllOrders();
     }, []);
+
+    useEffect(() => {
+        if (activeTab === 'products') {
+            fetchProducts();
+            fetchCategories();
+        }
+    }, [activeTab]);
 
     const fetchAllOrders = async () => {
         try {
@@ -56,12 +80,107 @@ const AdminDashboard = () => {
         setTimeout(() => setMessage(''), 3000);
     };
 
+    const fetchProducts = async () => {
+        try {
+            setProductsLoading(true);
+            const response = await axiosInstance.get('/api/products');
+            setProducts(response.data);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            showMessage('Failed to load products', 'error');
+        } finally {
+            setProductsLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axiosInstance.get('/api/categories');
+            setCategories(response.data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleAddProduct = async (e) => {
+        e.preventDefault();
+        
+        if (!formData.name || !formData.price || !formData.categoryId) {
+            showMessage('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            setProductsLoading(true);
+            const data = new FormData();
+            data.append('name', formData.name);
+            data.append('description', formData.description);
+            data.append('price', formData.price);
+            data.append('categoryId', formData.categoryId);
+            
+            if (imageFile) {
+                data.append('image', imageFile);
+            }
+
+            await axiosInstance.post('/api/products', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            showMessage('Product added successfully!');
+            setFormData({ name: '', description: '', price: '', categoryId: '' });
+            setImageFile(null);
+            setImagePreview(null);
+            setShowProductForm(false);
+            fetchProducts();
+        } catch (error) {
+            console.error('Error adding product:', error);
+            showMessage('Failed to add product. Please try again.');
+        } finally {
+            setProductsLoading(false);
+        }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        if (window.confirm('Are you sure you want to delete this product?')) {
+            try {
+                await axiosInstance.delete(`/api/products/${productId}`);
+                showMessage('Product deleted successfully!');
+                fetchProducts();
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showMessage('Failed to delete product.');
+            }
+        }
+    };
+
     const handleLogout = () => {
         logout();
         window.location.href = '/login';
     };
 
-    if (loading) {
+    if (loading && activeTab === 'orders') {
         return <div style={styles.loading}>Loading orders...</div>;
     }
 
@@ -70,8 +189,8 @@ const AdminDashboard = () => {
             {/* Header */}
             <div style={styles.header}>
                 <div>
-                    <h1 style={styles.title}>Order Administration</h1>
-                    <p style={styles.subtitle}>Manage customer orders</p>
+                    <h1 style={styles.title}>Admin Dashboard</h1>
+                    <p style={styles.subtitle}>Manage orders and products</p>
                 </div>
                 <div style={styles.userInfo}>
                     <span style={styles.username}>{user?.username}</span>
@@ -79,30 +198,51 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
+            {/* Tabs */}
+            <div style={styles.tabContainer}>
+                <button 
+                    onClick={() => setActiveTab('orders')}
+                    style={activeTab === 'orders' ? styles.tabActive : styles.tab}
+                >
+                    Orders
+                </button>
+                <button 
+                    onClick={() => setActiveTab('products')}
+                    style={activeTab === 'products' ? styles.tabActive : styles.tab}
+                >
+                    Products
+                </button>
+            </div>
+
             {/* Messages */}
             {message && (
-                <div style={styles.successMessage}>{message}</div>
+                <div style={{...styles.successMessage, backgroundColor: message.includes('Failed') ? '#f8d7da' : '#d4edda', color: message.includes('Failed') ? '#721c24' : '#155724'}}>
+                    {message}
+                </div>
             )}
             {error && (
                 <div style={styles.errorMessage}>{error}</div>
             )}
 
-            {/* Stats */}
-            <div style={styles.statsBar}>
-                <div style={styles.statItem}>
-                    <strong>{orders.length}</strong> Total
-                </div>
-                <div style={styles.statItem}>
-                    <strong>{orders.filter(o => o.status === 'PENDING').length}</strong> Pending
-                </div>
-                <div style={styles.statItem}>
-                    <strong>{orders.filter(o => o.status === 'PREPARING').length}</strong> Preparing
-                </div>
-                <div style={styles.statItem}>
-                    <strong>{orders.filter(o => o.status === 'DELIVERED').length}</strong> Delivered
-                </div>
-                <div style={styles.statItem}>
-                    <strong>{orders.filter(o => o.status === 'CANCELLED').length}</strong> Cancelled
+            {/* Orders Tab */}
+            {activeTab === 'orders' && (
+            <>
+                {/* Stats */}
+                <div style={styles.statsBar}>
+                    <div style={styles.statItem}>
+                        <strong>{orders.length}</strong> Total
+                    </div>
+                    <div style={styles.statItem}>
+                        <strong>{orders.filter(o => o.status === 'PENDING').length}</strong> Pending
+                    </div>
+                    <div style={styles.statItem}>
+                        <strong>{orders.filter(o => o.status === 'PREPARING').length}</strong> Preparing
+                    </div>
+                    <div style={styles.statItem}>
+                        <strong>{orders.filter(o => o.status === 'DELIVERED').length}</strong> Delivered
+                    </div>
+                    <div style={styles.statItem}>
+                        <strong>{orders.filter(o => o.status === 'CANCELLED').length}</strong> Cancelled
                 </div>
             </div>
 
@@ -224,6 +364,161 @@ const AdminDashboard = () => {
                     </table>
                 )}
             </div>
+            </>
+            )}
+
+            {/* Products Tab */}
+            {activeTab === 'products' && (
+            <div style={styles.productsSection}>
+                <div style={styles.productsHeader}>
+                    <h2 style={styles.sectionTitle}>Products</h2>
+                    <button 
+                        onClick={() => setShowProductForm(!showProductForm)}
+                        style={styles.addProductBtn}
+                    >
+                        {showProductForm ? '✕ Cancel' : '+ Add Product'}
+                    </button>
+                </div>
+
+                {/* Add Product Form */}
+                {showProductForm && (
+                    <div style={styles.formContainer}>
+                        <form onSubmit={handleAddProduct} style={styles.form}>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Product Name *</label>
+                                <input 
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleFormChange}
+                                    placeholder="Enter product name"
+                                    style={styles.input}
+                                    required
+                                />
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Category *</label>
+                                <select 
+                                    name="categoryId"
+                                    value={formData.categoryId}
+                                    onChange={handleFormChange}
+                                    style={styles.select}
+                                    required
+                                >
+                                    <option value="">Select a category</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div style={styles.formRow}>
+                                <div style={{...styles.formGroup, flex: 1}}>
+                                    <label style={styles.label}>Price (₱) *</label>
+                                    <input 
+                                        type="number"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleFormChange}
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        min="0"
+                                        style={styles.input}
+                                        required
+                                    />
+                                </div>
+                                <div style={{...styles.formGroup, flex: 1}}>
+                                    <label style={styles.label}>Image</label>
+                                    <input 
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        style={styles.input}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Description</label>
+                                <textarea 
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleFormChange}
+                                    placeholder="Enter product description"
+                                    style={styles.textarea}
+                                    rows="3"
+                                />
+                            </div>
+
+                            {imagePreview && (
+                                <div style={styles.previewContainer}>
+                                    <p style={styles.previewLabel}>Image Preview:</p>
+                                    <img src={imagePreview} alt="Preview" style={styles.previewImage} />
+                                </div>
+                            )}
+
+                            <div style={styles.formActions}>
+                                <button 
+                                    type="submit"
+                                    style={styles.submitBtn}
+                                    disabled={productsLoading}
+                                >
+                                    {productsLoading ? 'Adding...' : 'Add Product'}
+                                </button>
+                                <button 
+                                    type="button"
+                                    onClick={() => {
+                                        setShowProductForm(false);
+                                        setFormData({ name: '', description: '', price: '', categoryId: '' });
+                                        setImageFile(null);
+                                        setImagePreview(null);
+                                    }}
+                                    style={styles.cancelBtn}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* Products Grid */}
+                {productsLoading && !showProductForm ? (
+                    <p style={styles.noProducts}>Loading products...</p>
+                ) : products.length === 0 ? (
+                    <p style={styles.noProducts}>No products found. Add your first product!</p>
+                ) : (
+                    <div style={styles.productsGrid}>
+                        {products.map(product => (
+                            <div key={product.id} style={styles.productCard}>
+                                {product.imageUrl && (
+                                    <img 
+                                        src={product.imageUrl} 
+                                        alt={product.name}
+                                        style={styles.productCardImage}
+                                    />
+                                )}
+                                <div style={styles.productCardContent}>
+                                    <h3 style={styles.productCardName}>{product.name}</h3>
+                                    <p style={styles.productCardDesc}>{product.description || 'No description'}</p>
+                                    <p style={styles.productCardPrice}>₱{parseFloat(product.price).toFixed(2)}</p>
+                                    <p style={styles.productCardCategory}>
+                                        Category: {product.categoryName || 'N/A'}
+                                    </p>
+                                    <button 
+                                        onClick={() => handleDeleteProduct(product.id)}
+                                        style={styles.deleteBtn}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+            )}
         </div>
     );
 };
@@ -284,6 +579,35 @@ const styles = {
         fontSize: '12px',
         fontFamily: 'inherit'
     },
+    tabContainer: {
+        display: 'flex',
+        gap: '10px',
+        marginBottom: '20px',
+        borderBottom: '2px solid #ddd',
+        paddingBottom: '0'
+    },
+    tab: {
+        padding: '12px 20px',
+        fontSize: '14px',
+        border: 'none',
+        background: 'transparent',
+        color: '#666',
+        cursor: 'pointer',
+        fontWeight: '500',
+        borderBottom: '2px solid transparent',
+        transition: 'all 0.2s'
+    },
+    tabActive: {
+        padding: '12px 20px',
+        fontSize: '14px',
+        border: 'none',
+        background: 'transparent',
+        color: '#800000',
+        cursor: 'pointer',
+        fontWeight: '600',
+        borderBottom: '2px solid #800000',
+        transition: 'all 0.2s'
+    },
     successMessage: {
         padding: '8px 15px',
         marginBottom: '15px',
@@ -314,6 +638,25 @@ const styles = {
     ordersSection: {
         marginTop: '10px'
     },
+    productsSection: {
+        marginTop: '10px'
+    },
+    productsHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '25px'
+    },
+    addProductBtn: {
+        padding: '8px 16px',
+        background: '#800000',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '13px',
+        fontWeight: '500'
+    },
     sectionTitle: {
         fontSize: '18px',
         fontWeight: 'normal',
@@ -327,11 +670,167 @@ const styles = {
         color: '#666',
         fontSize: '13px'
     },
+    noProducts: {
+        textAlign: 'center',
+        padding: '40px',
+        color: '#666',
+        fontSize: '13px'
+    },
     loading: {
         textAlign: 'center',
         padding: '60px',
         fontSize: '14px',
         color: '#666'
+    },
+    formContainer: {
+        backgroundColor: '#f9f9f9',
+        padding: '20px',
+        borderRadius: '8px',
+        border: '1px solid #eee',
+        marginBottom: '30px'
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    formGroup: {
+        marginBottom: '15px'
+    },
+    formRow: {
+        display: 'flex',
+        gap: '15px'
+    },
+    label: {
+        fontSize: '13px',
+        fontWeight: '600',
+        marginBottom: '6px',
+        display: 'block',
+        color: '#333'
+    },
+    input: {
+        width: '100%',
+        padding: '8px 12px',
+        fontSize: '13px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        fontFamily: 'inherit',
+        boxSizing: 'border-box'
+    },
+    select: {
+        width: '100%',
+        padding: '8px 12px',
+        fontSize: '13px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        fontFamily: 'inherit',
+        boxSizing: 'border-box'
+    },
+    textarea: {
+        width: '100%',
+        padding: '8px 12px',
+        fontSize: '13px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        fontFamily: 'inherit',
+        boxSizing: 'border-box',
+        resize: 'vertical'
+    },
+    previewContainer: {
+        marginBottom: '15px'
+    },
+    previewLabel: {
+        fontSize: '13px',
+        fontWeight: '600',
+        marginBottom: '8px',
+        color: '#333'
+    },
+    previewImage: {
+        maxWidth: '200px',
+        maxHeight: '200px',
+        borderRadius: '4px',
+        border: '1px solid #ddd'
+    },
+    formActions: {
+        display: 'flex',
+        gap: '10px',
+        marginTop: '20px'
+    },
+    submitBtn: {
+        padding: '10px 20px',
+        background: '#800000',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '13px',
+        fontWeight: '600'
+    },
+    cancelBtn: {
+        padding: '10px 20px',
+        background: '#e0e0e0',
+        color: '#333',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '13px',
+        fontWeight: '600'
+    },
+    productsGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gap: '20px'
+    },
+    productCard: {
+        border: '1px solid #ddd',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        backgroundColor: '#fff',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+    },
+    productCardImage: {
+        width: '100%',
+        height: '200px',
+        objectFit: 'cover',
+        backgroundColor: '#f5f5f5'
+    },
+    productCardContent: {
+        padding: '15px'
+    },
+    productCardName: {
+        fontSize: '15px',
+        fontWeight: '600',
+        margin: '0 0 8px 0',
+        color: '#333'
+    },
+    productCardDesc: {
+        fontSize: '12px',
+        color: '#666',
+        margin: '0 0 8px 0',
+        lineHeight: '1.4',
+        maxHeight: '36px',
+        overflow: 'hidden'
+    },
+    productCardPrice: {
+        fontSize: '18px',
+        fontWeight: '600',
+        color: '#800000',
+        margin: '8px 0'
+    },
+    productCardCategory: {
+        fontSize: '12px',
+        color: '#777',
+        margin: '8px 0 12px 0'
+    },
+    deleteBtn: {
+        width: '100%',
+        padding: '8px',
+        background: '#cc0000',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '12px',
+        fontWeight: '600'
     },
     orderTable: {
         width: '100%',

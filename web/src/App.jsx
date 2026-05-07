@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Homepage from './pages/Homepage';
 import Products from './pages/Products';
+import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
@@ -45,6 +46,7 @@ function AppContent() {
                 <Route path="/dashboard" element={user && user.role !== 'ROLE_ADMIN' ? <Homepage /> : <Navigate to="/login" />} />
                 <Route path="/admin" element={user && user.role === 'ROLE_ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
                 <Route path="/cart" element={user ? <Cart /> : <Navigate to="/login" />} />
                 <Route path="/checkout" element={user ? <Checkout /> : <Navigate to="/login" />} />
                 <Route path="/orders" element={user ? <Orders /> : <Navigate to="/login" />} />
