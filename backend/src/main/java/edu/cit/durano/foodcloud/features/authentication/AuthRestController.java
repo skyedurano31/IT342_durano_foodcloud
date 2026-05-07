@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.controller;
+package edu.cit.durano.foodcloud.features.authentication;
 
 import edu.cit.durano.foodcloud.dto.AuthResponseDTO;
 import edu.cit.durano.foodcloud.entity.Role;
