@@ -1,6 +1,5 @@
-package edu.cit.durano.foodcloud.repository;
+package edu.cit.durano.foodcloud.features.category;
 
-import edu.cit.durano.foodcloud.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CategoryRepository extends JpaRepository<Category,Long> {

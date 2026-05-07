@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.dto;
+package edu.cit.durano.foodcloud.features.category;
 
 import jakarta.validation.constraints.NotBlank;
 

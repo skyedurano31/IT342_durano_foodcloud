@@ -1,7 +1,7 @@
 package edu.cit.durano.foodcloud.features.products;
 
-import edu.cit.durano.foodcloud.entity.Category;
-import edu.cit.durano.foodcloud.entity.OrderItem;
+import edu.cit.durano.foodcloud.features.category.Category;
+import edu.cit.durano.foodcloud.features.order.OrderItem;
 import edu.cit.durano.foodcloud.features.cart.CartItem;
 import jakarta.persistence.*;
 

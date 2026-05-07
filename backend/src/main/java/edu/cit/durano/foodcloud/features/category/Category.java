@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.entity;
+package edu.cit.durano.foodcloud.features.category;
 
 import edu.cit.durano.foodcloud.features.products.Product;
 import jakarta.persistence.*;

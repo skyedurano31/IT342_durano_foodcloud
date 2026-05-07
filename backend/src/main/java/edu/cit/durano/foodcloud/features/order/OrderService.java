@@ -1,7 +1,4 @@
-package edu.cit.durano.foodcloud.service;
-import edu.cit.durano.foodcloud.dto.OrderItemDto;
-import edu.cit.durano.foodcloud.dto.OrderDto;
-import edu.cit.durano.foodcloud.entity.*;
+package edu.cit.durano.foodcloud.features.order;
 import edu.cit.durano.foodcloud.features.authentication.User;
 import edu.cit.durano.foodcloud.features.authentication.UserRepository;
 import edu.cit.durano.foodcloud.features.cart.Cart;
@@ -10,7 +7,6 @@ import edu.cit.durano.foodcloud.features.cart.CartItemRepository;
 import edu.cit.durano.foodcloud.features.cart.CartRepository;
 import edu.cit.durano.foodcloud.features.products.Product;
 import edu.cit.durano.foodcloud.features.products.ProductRepository;
-import edu.cit.durano.foodcloud.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
