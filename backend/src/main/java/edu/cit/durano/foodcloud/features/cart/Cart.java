@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.entity;
+package edu.cit.durano.foodcloud.features.cart;
 
 import edu.cit.durano.foodcloud.features.authentication.User;
 import jakarta.persistence.*;

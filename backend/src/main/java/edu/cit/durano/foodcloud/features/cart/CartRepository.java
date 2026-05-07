@@ -1,6 +1,5 @@
-package edu.cit.durano.foodcloud.repository;
+package edu.cit.durano.foodcloud.features.cart;
 
-import edu.cit.durano.foodcloud.entity.Cart;
 import edu.cit.durano.foodcloud.features.authentication.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

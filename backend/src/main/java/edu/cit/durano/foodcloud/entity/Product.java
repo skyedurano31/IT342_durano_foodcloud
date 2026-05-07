@@ -1,5 +1,6 @@
 package edu.cit.durano.foodcloud.entity;
 
+import edu.cit.durano.foodcloud.features.cart.CartItem;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

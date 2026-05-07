@@ -1,7 +1,5 @@
-package edu.cit.durano.foodcloud.controller;
+package edu.cit.durano.foodcloud.features.cart;
 
-import edu.cit.durano.foodcloud.dto.CartDto;
-import edu.cit.durano.foodcloud.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
