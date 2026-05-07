@@ -1,4 +1,4 @@
-package edu.cit.durano.foodcloud.dto;
+package edu.cit.durano.foodcloud.features.payment;
 
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;

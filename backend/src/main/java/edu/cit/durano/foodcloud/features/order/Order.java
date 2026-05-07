@@ -1,6 +1,6 @@
 package edu.cit.durano.foodcloud.features.order;
 
-import edu.cit.durano.foodcloud.entity.Payment;
+import edu.cit.durano.foodcloud.features.payment.Payment;
 import edu.cit.durano.foodcloud.features.authentication.User;
 import jakarta.persistence.*;
 
