@@ -1,6 +1,6 @@
 package edu.cit.durano.foodcloud.config;
 
-import edu.cit.durano.foodcloud.entity.User;
+import edu.cit.durano.foodcloud.features.authentication.User;
 import edu.cit.durano.foodcloud.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
