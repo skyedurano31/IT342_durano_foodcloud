@@ -3,6 +3,7 @@ import edu.cit.durano.foodcloud.dto.OrderItemDto;
 import edu.cit.durano.foodcloud.dto.OrderDto;
 import edu.cit.durano.foodcloud.entity.*;
 import edu.cit.durano.foodcloud.features.authentication.User;
+import edu.cit.durano.foodcloud.features.authentication.UserRepository;
 import edu.cit.durano.foodcloud.repository.*;
 import org.springframework.stereotype.Service;
 

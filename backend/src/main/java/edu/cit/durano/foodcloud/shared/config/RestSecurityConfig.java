@@ -1,7 +1,7 @@
 package edu.cit.durano.foodcloud.shared.config;
 
 import edu.cit.durano.foodcloud.features.authentication.User;
-import edu.cit.durano.foodcloud.repository.UserRepository;
+import edu.cit.durano.foodcloud.features.authentication.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

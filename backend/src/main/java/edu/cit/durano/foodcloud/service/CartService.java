@@ -9,7 +9,7 @@ import edu.cit.durano.foodcloud.features.authentication.User;
 import edu.cit.durano.foodcloud.repository.CartItemRepository;
 import edu.cit.durano.foodcloud.repository.CartRepository;
 import edu.cit.durano.foodcloud.repository.ProductRepository;
-import edu.cit.durano.foodcloud.repository.UserRepository;
+import edu.cit.durano.foodcloud.features.authentication.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
