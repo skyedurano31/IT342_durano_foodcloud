@@ -1,17 +1,17 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { UserProvider, useUser } from './contexts/UserContext';
-import Navbar from './components/Navbar';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Homepage from './pages/Homepage';
-import Products from './pages/Products';
-import ProductDetails from './pages/ProductDetails';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import AdminDashboard from './pages/AdminDashboard';
+import { UserProvider, useUser } from './shared/UserContext';
+import Navbar from './shared/Navbar';
+import Login from './features/auth/Login';
+import Register from './features/auth/Register';
+import Homepage from './features/home/Homepage';
+import Products from './features/products/Products';
+import ProductDetails from './features/products/ProductDetails';
+import Cart from './features/cart/Cart';
+import Checkout from './features/checkout/Checkout';
+import Orders from './features/orders/Orders';
+import AdminDashboard from './features/admin/AdminDashboard';
 
 function App() {
     return (
