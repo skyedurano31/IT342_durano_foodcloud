@@ -3,8 +3,10 @@ package edu.cit.durano.foodcloud.controller;
 import edu.cit.durano.foodcloud.dto.ProductDto;
 import edu.cit.durano.foodcloud.service.ProductService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,16 +30,61 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
-    @PostMapping
+    // MODIFIED: Handle multipart form data with image file
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDto> createProductWithImage(
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("price") String price,  // String to handle decimal conversion
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile) {
+
+        try {
+            // Create DTO from form parameters
+            ProductDto productDto = new ProductDto();
+            productDto.setName(name);
+            productDto.setDescription(description);
+            productDto.setPrice(new java.math.BigDecimal(price));
+            productDto.setCategoryId(categoryId);
+
+            // Pass the image file to service
+            ProductDto created = productService.createProductWithImage(productDto, imageFile);
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // Keep your original JSON endpoint if needed for other clients
+    @PostMapping("/json")
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
         ProductDto created = productService.createProduct(productDto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id,
-                                                    @RequestBody ProductDto productDto) {
-        return ResponseEntity.ok(productService.updateProduct(id, productDto));
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDto> updateProductWithImage(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("price") String price,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile) {
+
+        try {
+            ProductDto productDto = new ProductDto();
+            productDto.setName(name);
+            productDto.setDescription(description);
+            productDto.setPrice(new java.math.BigDecimal(price));
+            productDto.setCategoryId(categoryId);
+
+            ProductDto updated = productService.updateProductWithImage(id, productDto, imageFile);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @DeleteMapping("/{id}")

@@ -150,7 +150,7 @@ const Products = () => {
                             >
                                 {product.imageUrl && (
                                     <img 
-                                        src={product.imageUrl} 
+                                        src={`http://localhost:8080${product.imageUrl}`} 
                                         alt={product.name}
                                         style={styles.productImage}
                                     />
