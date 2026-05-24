@@ -36,6 +36,7 @@ public class ProductController {
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("price") String price,  // String to handle decimal conversion
+            @RequestParam("stock") Integer stockQuantity,
             @RequestParam("categoryId") Long categoryId,
             @RequestParam(value = "image", required = false) MultipartFile imageFile) {
 
@@ -45,6 +46,7 @@ public class ProductController {
             productDto.setName(name);
             productDto.setDescription(description);
             productDto.setPrice(new java.math.BigDecimal(price));
+            productDto.setStockQuantity(stockQuantity);
             productDto.setCategoryId(categoryId);
 
             // Pass the image file to service
@@ -69,6 +71,7 @@ public class ProductController {
             @RequestParam("name") String name,
             @RequestParam("description") String description,
             @RequestParam("price") String price,
+            @RequestParam("stock") Integer stockQuantity,
             @RequestParam("categoryId") Long categoryId,
             @RequestParam(value = "image", required = false) MultipartFile imageFile) {
 
@@ -77,6 +80,7 @@ public class ProductController {
             productDto.setName(name);
             productDto.setDescription(description);
             productDto.setPrice(new java.math.BigDecimal(price));
+            productDto.setStockQuantity(stockQuantity);
             productDto.setCategoryId(categoryId);
 
             ProductDto updated = productService.updateProductWithImage(id, productDto, imageFile);

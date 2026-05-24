@@ -37,7 +37,6 @@ public class OrderService {
 
     public OrderDto createOrderFromCart(Long userId, String building, String roomNumber,
                                         String deliveryInstructions, String phoneNumber) {
-        // 1. Get user's cart
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
@@ -45,7 +44,6 @@ public class OrderService {
             throw new RuntimeException("Cannot create order from empty cart");
         }
 
-        // 2. Check stock availability
         for (CartItem cartItem : cart.getCartItems()) {
             Product product = cartItem.getProduct();
             if (product.getStockQuantity() < cartItem.getQuantity()) {
@@ -53,11 +51,9 @@ public class OrderService {
             }
         }
 
-        // 3. Get user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 4. Create order
         Order order = new Order();
         order.setOrderNumber(generateOrderNumber());
         order.setOrderDate(LocalDateTime.now());
@@ -68,7 +64,6 @@ public class OrderService {
         order.setPhoneNumber(phoneNumber);
         order.setUser(user);
 
-        // 5. Convert cart items to order items and reduce stock
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (CartItem cartItem : cart.getCartItems()) {
             Product product = cartItem.getProduct();
@@ -79,21 +74,17 @@ public class OrderService {
             orderItem.setProduct(product);
             order.addOrderItem(orderItem);
 
-            // Calculate total
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);
 
-            // Reduce stock
             product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
             productRepository.save(product);
         }
 
         order.setTotalAmount(totalAmount);
 
-        // 6. Save order
         Order savedOrder = orderRepository.save(order);
 
-        // 7. Clear cart
         cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
         cart.setTotalAmount(BigDecimal.ZERO);

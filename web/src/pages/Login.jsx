@@ -11,7 +11,7 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user) navigate('/products');
+        if (user) navigate('/homepage');
     }, [user, navigate]);
 
     const handleSubmit = async (e) => {

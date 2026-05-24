@@ -22,6 +22,7 @@ const AdminDashboard = () => {
         name: '',
         description: '',
         price: '',
+        stock: '',
         categoryId: ''
     });
     const [imageFile, setImageFile] = useState(null);
@@ -125,7 +126,7 @@ const AdminDashboard = () => {
     const handleAddProduct = async (e) => {
         e.preventDefault();
         
-        if (!formData.name || !formData.price || !formData.categoryId) {
+        if (!formData.name || !formData.price || !formData.categoryId || formData.stock === '') {
             showMessage('Please fill in all required fields');
             return;
         }
@@ -136,6 +137,7 @@ const AdminDashboard = () => {
             data.append('name', formData.name);
             data.append('description', formData.description);
             data.append('price', formData.price);
+            data.append('stock', formData.stock);
             data.append('categoryId', formData.categoryId);
             
             if (imageFile) {
@@ -149,7 +151,7 @@ const AdminDashboard = () => {
             });
 
             showMessage('Product added successfully!');
-            setFormData({ name: '', description: '', price: '', categoryId: '' });
+            setFormData({ name: '', description: '', price: '', stock: '', categoryId: '' });
             setImageFile(null);
             setImagePreview(null);
             setShowProductForm(false);
@@ -429,6 +431,22 @@ const AdminDashboard = () => {
                                     />
                                 </div>
                                 <div style={{...styles.formGroup, flex: 1}}>
+                                    <label style={styles.label}>Stock Quantity *</label>
+                                    <input 
+                                        type="number"
+                                        name="stock"
+                                        value={formData.stock}
+                                        onChange={handleFormChange}
+                                        placeholder="0"
+                                        min="0"
+                                        style={styles.input}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={styles.formRow}>
+                                <div style={{...styles.formGroup, flex: 1}}>
                                     <label style={styles.label}>Image</label>
                                     <input 
                                         type="file"
@@ -470,7 +488,7 @@ const AdminDashboard = () => {
                                     type="button"
                                     onClick={() => {
                                         setShowProductForm(false);
-                                        setFormData({ name: '', description: '', price: '', categoryId: '' });
+                                        setFormData({ name: '', description: '', price: '', stock: '', categoryId: '' });
                                         setImageFile(null);
                                         setImagePreview(null);
                                     }}
@@ -505,6 +523,11 @@ const AdminDashboard = () => {
                                     <p style={styles.productCardPrice}>₱{parseFloat(product.price).toFixed(2)}</p>
                                     <p style={styles.productCardCategory}>
                                         Category: {product.categoryName || 'N/A'}
+                                    </p>
+                                    <p style={styles.productCardStock}>
+                                        Stock: <strong style={{color: product.stockQuantity > 0 ? '#008000' : '#cc0000'}}>
+                                            {product.stockQuantity || 0} units
+                                        </strong>
                                     </p>
                                     <button 
                                         onClick={() => handleDeleteProduct(product.id)}
@@ -820,6 +843,12 @@ const styles = {
         fontSize: '12px',
         color: '#777',
         margin: '8px 0 12px 0'
+    },
+    productCardStock: {
+        fontSize: '12px',
+        color: '#333',
+        margin: '8px 0 12px 0',
+        fontWeight: '500'
     },
     deleteBtn: {
         width: '100%',

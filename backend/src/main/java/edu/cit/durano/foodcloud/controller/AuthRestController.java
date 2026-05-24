@@ -29,15 +29,13 @@ public class AuthRestController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
-            // Check if username already exists
             if (userRepository.findByUsername(user.getUsername()).isPresent()) {
                 return ResponseEntity.badRequest()
                         .body(new AuthResponseDTO("Username already exists", null, null, null, false));
             }
 
-            // Encode the password and save to password_hash field
             user.setPassword_hash(passwordEncoder.encode(user.getPassword_hash()));
-            user.setRole(Role.ROLE_USER);  // Set default role
+            user.setRole(Role.ROLE_USER);
 
             User savedUser = userRepository.save(user);
 
@@ -54,7 +52,6 @@ public class AuthRestController {
         }
     }
 
-    // Get current user info
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -62,7 +59,6 @@ public class AuthRestController {
                     .body(Map.of("error", "Not authenticated"));
         }
 
-        // Check if user logged in via Google OAuth2
         if (authentication.getPrincipal() instanceof OAuth2User) {
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
             String email = oauth2User.getAttribute("email");
@@ -88,9 +84,9 @@ public class AuthRestController {
                 user = userRepository.save(user);
             }
 
-            // ✅ ADD THE ID HERE
+
             return ResponseEntity.ok(Map.of(
-                    "id", user.getId(),           // ← ADD THIS
+                    "id", user.getId(),
                     "username", user.getUsername(),
                     "email", user.getEmail(),
                     "role", user.getRole().toString(),
@@ -98,7 +94,6 @@ public class AuthRestController {
             ));
         }
 
-        // Handle regular username/password login
         if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
             org.springframework.security.core.userdetails.User userDetails =
                     (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
@@ -106,9 +101,8 @@ public class AuthRestController {
             Optional<User> userOpt = userRepository.findByUsername(userDetails.getUsername());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                // ✅ ADD THE ID HERE
                 return ResponseEntity.ok(Map.of(
-                        "id", user.getId(),       // ← ADD THIS
+                        "id", user.getId(),
                         "username", user.getUsername(),
                         "email", user.getEmail(),
                         "role", user.getRole().toString(),
@@ -121,7 +115,6 @@ public class AuthRestController {
                 .body(Map.of("error", "User not found"));
     }
 
-    // Logout endpoint
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         SecurityContextHolder.clearContext();

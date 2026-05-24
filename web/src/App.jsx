@@ -46,6 +46,7 @@ function AppContent() {
                 <Route path="/dashboard" element={user && user.role !== 'ROLE_ADMIN' ? <Homepage /> : <Navigate to="/login" />} />
                 <Route path="/admin" element={user && user.role === 'ROLE_ADMIN' ? <AdminDashboard /> : <Navigate to="/login" />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/homepage" element={<Homepage />} />
                 <Route path="/products/:id" element={<ProductDetails />} />
                 <Route path="/cart" element={user ? <Cart /> : <Navigate to="/login" />} />
                 <Route path="/checkout" element={user ? <Checkout /> : <Navigate to="/login" />} />
