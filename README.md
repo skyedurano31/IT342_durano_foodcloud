@@ -6,30 +6,19 @@ FoodCloud is a full-stack monorepo featuring a Spring Boot REST API, a React web
 
 > Built with Java 17, Spring Boot 3, React 19, Kotlin, and Jetpack Compose.
 
----
-
-## 📱 Screenshots
-
-> *(Add screenshots here — homepage, product listing, cart, and mobile views)*
-
-| Web Home | Web Products | Android Home |
-|:---:|:---:|:---:|
-| | | |
-
----
 
 ## 📦 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         Clients                              │
-│  ┌──────────────┐  ┌──────────────────┐  ┌───────────────┐  │
-│  │  React Web   │  │  Android App     │  │  Android App  │  │
-│  │  (web/)      │  │  Jetpack Compose │  │  XML Layouts  │  │
-│  │              │  │  (mobile3/)      │  │  (mobile/)    │  │
-│  └──────┬───────┘  └────────┬─────────┘  └───────┬───────┘  │
-│         └──────────────────┬──────────────────────┘         │
-│                            │ HTTP / REST                     │
+│                         Clients                             │
+│  ┌──────────────┐  ┌──────────────────┐                     │
+│  │  React Web   │  │  Android App     │                     │
+│  │  (web/)      │  │  Jetpack Compose │                     │
+│  │              │  │  (mobile3/)      │                     │
+│  └──────┬───────┘  └────────┬─────────┘                     │
+│         └──────────────────┬─                               │
+│                            │ HTTP / REST                    │
 ├────────────────────────────┼────────────────────────────────┤
 │                      ┌─────┴──────┐                         │
 │                      │  Backend   │                         │
@@ -84,100 +73,6 @@ FoodCloud is a full-stack monorepo featuring a Spring Boot REST API, a React web
 - **CORS Configuration** — Supports web dev server and Android emulator simultaneously
 - **Image Upload** — Server-side file storage with UUID-based filenames
 
----
-
-## 📁 Project Structure
-
-```
-foodcloud/
-├── backend/                    # Spring Boot REST API
-│   ├── src/main/java/.../
-│   │   ├── config/             # Security, CORS, web config
-│   │   ├── controller/         # REST controllers
-│   │   ├── dto/                # Data transfer objects
-│   │   ├── entity/             # JPA entities
-│   │   ├── repository/         # Spring Data repositories
-│   │   └── service/            # Business logic
-│   ├── src/main/resources/
-│   │   └── application.properties
-│   └── pom.xml
-│
-├── web/                        # React frontend
-│   ├── src/
-│   │   ├── api/                # Axios config & API calls
-│   │   ├── components/         # Shared components (Navbar, etc.)
-│   │   ├── contexts/           # React context (UserContext)
-│   │   ├── hooks/              # Custom hooks (useCart, useOrders, useProducts)
-│   │   ├── pages/              # Route pages
-│   │   └── App.jsx / main.jsx
-│   └── package.json
-│
-├── mobile3/                    # Android app (Jetpack Compose)
-│   ├── app/src/main/java/.../
-│   │   ├── data/api/           # Retrofit API service
-│   │   ├── data/models/        # Data classes
-│   │   ├── data/repository/    # Repository layer
-│   │   ├── ui/screens/         # Compose screens (auth, cart, checkout, home, orders)
-│   │   ├── ui/theme/           # Material 3 theme
-│   │   ├── utils/              # SessionManager (DataStore)
-│   │   └── viewmodel/          # ViewModels
-│   └── app/build.gradle.kts
-│
-├── mobile/                     # Android app (XML layouts)
-│   ├── app/src/main/java/.../
-│   │   ├── models/             # Data models
-│   │   ├── network/            # Retrofit client & API
-│   │   └── *.Activity.kt       # Activity-based screens
-│   └── app/build.gradle.kts
-│
-└── docs/
-    └── Durano_foodcloud_SDD.docx  # Software Design Document
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **JDK 17+**
-- **Node.js 20+** and npm
-- **Android Studio** (for mobile builds)
-- **PostgreSQL** (or a Supabase account for hosted DB)
-
-### 1. Database Setup
-
-Create a PostgreSQL database, or use [Supabase](https://supabase.com) (free tier works). The schema auto-generates via Hibernate's `ddl-auto=update`.
-
-### 2. Backend
-
-```bash
-cd backend
-
-# Configure your database credentials
-cp src/main/resources/application.properties src/main/resources/application.properties.example
-# Edit application.properties with your DB URL, username, and password
-# Or use environment variables
-
-./mvnw spring-boot:run
-```
-
-The API starts at `http://localhost:8080`.
-
-### 3. Web Frontend
-
-```bash
-cd web
-npm install
-npm run dev
-```
-
-Opens at `http://localhost:5173`.
-
-### 4. Android App
-
-Open the `mobile3/` (or `mobile/`) folder in Android Studio, sync Gradle, and run on an emulator or device.
-
-> **Note:** The Android emulator accesses the local backend at `http://10.0.2.2:8080`. CORS is pre-configured for this.
 
 ---
 
@@ -199,8 +94,6 @@ Open the `mobile3/` (or `mobile/`) folder in Android Studio, sync Gradle, and ru
 | POST | `/api/orders` | USER | Place order |
 | GET | `/api/orders/user/{userId}` | USER | Get user's orders |
 | GET | `/api/orders/{id}` | USER | Get order details |
-
-Full endpoint documentation available in the backend source controllers.
 
 ---
 
@@ -228,12 +121,6 @@ Key configuration in `backend/src/main/resources/application.properties`:
 - [Retrofit](https://square.github.io/retrofit/) — HTTP client for Android
 - [Supabase](https://supabase.com) — Hosted PostgreSQL
 - [Vite](https://vitejs.dev) — Web build tool
-
----
-
-## 📄 License
-
-This project is for educational and portfolio purposes.
 
 ---
 
